@@ -124,8 +124,8 @@ For more details, see the [Contribution Guide](./CONTRIBUTING.md).
   
 ## 🤝 Contributors
 
-- **You**: Thanks for contributing to this project!
-- **Your girlfriend**: Special thanks to my teammate for helping build this!
+- **Me**: Thanks for contributing to this project!
+- **My girlfriend**: Special thanks to my teammate for helping build this!
 
 ## 📄 License
 
