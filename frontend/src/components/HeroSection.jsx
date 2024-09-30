@@ -1,5 +1,5 @@
 import React from "react";
-const welcome = () => {
+const HeroSection = () => {
     return (
         <div className="flex-col items-center gap-4 m-4 pl-3">
             <div className="text-pink-800 text-[6.75em] font-Pacifico font-bold leading-tight mb-10">Welcome Ahihi</div>
@@ -8,4 +8,4 @@ const welcome = () => {
         </div>
     )
 }
-export default welcome
+export default HeroSection
