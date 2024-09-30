@@ -11,7 +11,6 @@ function App() {
       <Header/>
       <Routes>
       <Route path="/" element={<LandingPage />} />
-
       </Routes>
   </Router>
   );

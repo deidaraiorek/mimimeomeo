@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Content = () => {
+const Boxes = () => {
   return (
     <div className='flex p-20 gap-10'>
         <button className = 'flex flex-col justify-center items-center bg-gradient-to-r from-pink-200 to-purple-100 shadow-xl rounded-lg w-1/4 bg-cover bg-center hover:shadow-2xl transition-shadow duration-300 p-20 text-center'>
@@ -34,4 +34,4 @@ const Content = () => {
   )
 }
 
-export default Content
+export default Boxes
