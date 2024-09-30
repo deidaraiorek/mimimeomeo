@@ -1,5 +1,4 @@
 import React from "react";
-
 const welcome = () => {
     return (
         <div className="flex-col items-center gap-4 m-4 pl-3">
@@ -9,5 +8,4 @@ const welcome = () => {
         </div>
     )
 }
-
 export default welcome
