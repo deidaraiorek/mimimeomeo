@@ -1,33 +1,41 @@
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  directUrl         = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String   // Password for authentication        
+  coupleId  Int?     // Removed @unique constraint to allow multiple users per couple
+  couple    Couple?  @relation(fields: [coupleId], references: [id]) 
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([coupleId])
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+model Couple {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  users     User[]   // A couple has two users
+  notes     Note[]   // A couple can share multiple notes
 }
 
 model Note {
   id        Int      @id @default(autoincrement())
   title     String?  // Title of the note (optional)
   content   Json     // Delta (JSON) content of the note
-  createdAt DateTime @default(now())  // Automatically stores when the note was created
-  updatedAt DateTime @updatedAt  // Automatically updates when the note is modified
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  coupleId  Int      // Link notes to the couple
+  couple    Couple   @relation(fields: [coupleId], references: [id])
+
+  @@index([coupleId])
 }

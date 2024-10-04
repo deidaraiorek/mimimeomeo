@@ -1,18 +1,19 @@
-import React, { useState, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useLocation } from "react-router-dom";
 
-function TextEditor() {
-  const [content, setContent] = useState("");
-  const [checkboxCount, setCheckboxCount] = useState({ total: 0, checked: 0 });
+function TextEditor({ note, onUpdateNote }) {
   const quillRef = useRef(null);
+  const location = useLocation(); 
 
-  const handleChange = (value) => {
-    setContent(value);
-    countCheckboxes();
+  const handleContentChange = (value) => {
+    // Locally update the note content while typing (without triggering save)
+    const updatedNote = { ...note, content: value };
+    onUpdateNote(updatedNote); // This only updates the state locally
   };
 
-  const countCheckboxes = () => {
+  const countCheckboxes = (updatedNote) => {
     const editor = quillRef.current.getEditor();
     const delta = editor.getContents();
 
@@ -31,8 +32,45 @@ function TextEditor() {
       }
     });
 
-    setCheckboxCount({ total, checked });
+    return { ...updatedNote, checkboxCount: { total, checked } };
   };
+
+  const saveNoteToBackend = async (note) => {
+    try {
+      await fetch("/api/saveNote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(note),
+      });
+      console.log("Note saved successfully");
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
+  };
+
+  // Save note on tab close or refresh and when location changes
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      // Save the note before closing or refreshing the page
+      saveNoteToBackend(note);
+    };
+
+    // Save the note when the user navigates to a new route (detect location change)
+    const handleLocationChange = () => {
+      saveNoteToBackend(note);
+    };
+
+    // Add event listener for beforeunload
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Save the note when the route changes
+    const unlisten = handleLocationChange;
+
+    // Clean up event listeners on unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [note, location]); // Dependency on `note` and `location` changes
 
   const modules = {
     toolbar: [
@@ -65,15 +103,16 @@ function TextEditor() {
   ];
 
   return (
-    <div>
-      <h2>Text Editor</h2>
+    <div style={{ flex: 1, padding: "16px" }}>
+      <h2>{note.title}</h2>
       <p>
-        Checked: {checkboxCount.checked} / Total: {checkboxCount.total}
+        Checked: {note.checkboxCount.checked} / Total:{" "}
+        {note.checkboxCount.total}
       </p>
       <ReactQuill
         ref={quillRef}
-        value={content}
-        onChange={handleChange}
+        value={note.content}
+        onChange={handleContentChange}
         modules={modules}
         formats={formats}
       />

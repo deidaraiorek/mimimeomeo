@@ -1,26 +1,20 @@
-// index.js
-const { PrismaClient } = require("@prisma/client");
+const express = require('express');
+const dotenv = require('dotenv');
+const { PrismaClient } = require('@prisma/client');
+
+dotenv.config();
+
 const prisma = new PrismaClient();
 
-async function main() {
-  // Create a new user
-  const newUser = await prisma.user.create({
-    data: {
-      email: "user@example.com",
-      name: "John Doe",
-    },
-  });
-  console.log("Created new user:", newUser);
+const app = express();
 
-  // Fetch all users
-  const allUsers = await prisma.user.findMany();
-  console.log("All users:", allUsers);
-}
+app.use(express.json());
 
-main()
-  .catch((e) => {
-    throw e;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+app.get('/', (req, res) => {
+  res.send('Hello, Prisma with Node.js and PostgreSQL!');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

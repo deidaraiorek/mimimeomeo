@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import TextEditor from "./components/TextEditor";
+import CoupleNote from "./pages/CoupleNote";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/text-editor" element={<TextEditor />} />
+        <Route path="/couplenote" element={<CoupleNote />} />
         {/* Add other routes here */}
       </Routes>
     </Router>
