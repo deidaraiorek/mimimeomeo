@@ -1,0 +1,9 @@
+node_modules
+# Keep environment variables out of version control
+.env
+# Ignore logs
+logs
+*.log
+npm-debug.log*
+# Ignore package-lock.json
+package-lock.json
