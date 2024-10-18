@@ -15,6 +15,7 @@ model User {
   password  String   // Password for authentication        
   coupleId  Int?     // Removed @unique constraint to allow multiple users per couple
   couple    Couple?  @relation(fields: [coupleId], references: [id]) 
+  receivedInvitations Invitation[] @relation("receiverInvitations", fields: [email], references: [receiverEmail])
   createdAt DateTime @default(now())
 
   @@index([email])
@@ -38,4 +39,13 @@ model Note {
   couple    Couple   @relation(fields: [coupleId], references: [id])
 
   @@index([coupleId])
+}
+
+model Invitation {
+  senderEmail    String   @unique
+  receiverEmail  String   @unique
+  status         String   // Status of the invitation (e.g., pending, accepted, declined)
+  sentAt        DateTime @default(now())
+
+  @@id([senderEmail, receiverEmail]) // Use for uniqueness
 }

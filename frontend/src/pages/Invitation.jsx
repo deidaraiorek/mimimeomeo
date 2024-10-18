@@ -1,45 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import invitationbg from "../assets/invitationbg.png";
 
 const Invitation = () => {
-  const [email, setEmail] = useState('');
-  const [invitations, setInvitations] = useState([]);
+  const [invitationEmail, setInvitationEmail] = useState("");
+  const [sentInvitations, setSentInvitations] = useState([]);
+  const [isInvitationOpen, setIsInvitationOpen] = useState(false);
 
-  const handleInvite = () => {
-    if (email && !invitations.includes(email)) {
-      setInvitations([...invitations, email]);
-      setEmail(''); // Clear the input after submission
+  // Function to handle sending an invitation
+  const sendInvitation = () => {
+    if (invitationEmail) {
+      setInvitationEmail(""); 
+      alert("Invitation sent!");
+    } else {
+      alert("Please enter an email address.");
     }
   };
 
-  return (
-    <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
-      <h2>Invite Your Love</h2>
-      <input
-        type="email"
-        placeholder="Enter email to invite"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ padding: '10px', width: '80%', marginBottom: '10px' }}
-      />
-      <br />
-      <button onClick={handleInvite} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-        Invite
-      </button>
+  // Toggle the invitation list dropdown
+  const InvitationBox = () => {
+    setIsInvitationOpen(!isInvitationOpen);
+  };
 
-      <div style={{ marginTop: '20px' }}>
-        <h3>Sent Invitations</h3>
-        {invitations.length === 0 ? (
-          <p>No invitations sent yet.</p>
-        ) : (
-          <ul>
-            {invitations.map((invite, index) => (
-              <li key={index}>{invite}</li>
-            ))}
-          </ul>
+  return (
+    <div className="flex items-center justify-center min-h-screen"
+    style={{
+        backgroundImage: `url(${invitationbg})`, // Correct use of template literal
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+      }}>
+      <div className="absolute top-20 right-5">
+        <button
+          className="px-4 py-2 text-white bg-pink-400 rounded-lg hover:bg-pink-500"
+          onClick={InvitationBox}
+        >
+          Your Invitations
+        </button>
+        {isInvitationOpen && (
+          <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg w-64">
+            {sentInvitations.length > 0 ? (
+              <ul className="p-4">
+                {sentInvitations.map((invite, index) => (
+                  <li key={index} className="py-2 border-b last:border-none">
+                    {invite.email} - <span className="text-sm text-gray-600">{invite.status}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="p-4 text-gray-500">No invitations sent yet.</p>
+            )}
+          </div>
         )}
+      </div>
+
+      {/* Center box for sending invites */}
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-2xl text-center font-bold text-pink-900">Invite Your Partner</h1>
+        <p className="mt-4 text-gray-600">Enter the email of the person you'd like to invite:</p>
+        <input
+          type="email"
+          placeholder="Enter email address"
+          value={invitationEmail}
+          onChange={(e) => setInvitationEmail(e.target.value)}
+          className="w-full px-4 py-2 mt-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button
+          onClick={sendInvitation}
+          className="w-full px-4 py-2 mt-4 text-white bg-pink-400 rounded-lg hover:bg-pink-500"
+        >
+          Send Invitation
+        </button>
       </div>
     </div>
   );
 };
 
-export default Invitation
+export default Invitation;

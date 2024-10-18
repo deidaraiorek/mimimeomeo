@@ -22,7 +22,7 @@ const EventInput = ({ value, setvalue, content }) => {
                 onChange={(e) => setvalue(e.target.value)}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                placeholder={focus ? "" : content}
+                placeholder={focus ? "" : content} /*fix later without onblur (check invitation page)*/
                 className='p-3 rounded-lg w-full'
             />
         </div>
