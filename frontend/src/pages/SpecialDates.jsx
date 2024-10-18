@@ -1,10 +1,9 @@
 import React from 'react'
-import CustomDatePicker from '../../components/specialdate/CustomDatePicker'
-
+import CustomDatePicker from '../components/specialdate/CustomDatePicker'
 const SpecialDates = () => {
   return (
     <div>
-        <CustomDatePicker/>
+        <CustomDatePicker />
     </div>
   )
 }
