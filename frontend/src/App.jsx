@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import CoupleNote from "./pages/CoupleNote";
 import "./App.css";
-import Header from "./components/Header";
+import Header from "./components/landing/Header";
 import LandingPage from "./pages/LandingPage";
 import SignUp from "./pages/auth/SignUp";
 import LogIn from "./pages/auth/LogIn";

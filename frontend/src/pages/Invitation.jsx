@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import invitationbg from "../assets/invitationbg.png";
+import { useNavigate } from "react-router-dom";
 
 const Invitation = () => {
   const [invitationEmail, setInvitationEmail] = useState("");
   const [sentInvitations, setSentInvitations] = useState([]);
   const [isInvitationOpen, setIsInvitationOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if the user is stored in localStorage
+    const user = localStorage.getItem('user');
+    
+    if (!user) {
+      // If no user is found, navigate to the home page
+      navigate('/');
+    }
+  }, [navigate]);
+
 
   // Function to handle sending an invitation
   const sendInvitation = () => {

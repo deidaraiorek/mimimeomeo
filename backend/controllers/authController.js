@@ -13,10 +13,11 @@ const signup = async (req, res) => {
         return res.status(400).json("Invalid email format");
     }
 
-    const existemail = await prisma.User.findUnique({
+    const existemail = await prisma.user.findUnique({
         where: {email}
     })
     if (existemail) {
+        console.log("email exist")
         return res.status(400).json("Email already exists")
     }
 
