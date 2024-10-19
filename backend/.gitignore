@@ -7,4 +7,3 @@ logs
 npm-debug.log*
 # Ignore package-lock.json
 package-lock.json
-.env
