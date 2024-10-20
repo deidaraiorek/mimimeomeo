@@ -14,6 +14,9 @@ export const API_ROUTES = {
   GET_COUPLE_NOTES: (coupleId) => `${API_BASE_URL}/notes/couple/${coupleId}`, // Dynamic couple ID
   UPDATE_NOTE: (noteId) => `${API_BASE_URL}/notes/${noteId}`,
   DELETE_NOTE: (noteId) => `${API_BASE_URL}/notes/${noteId}`,
+
+  LOGIN: `${API_BASE_URL}/auth/login`,
+  SIGNUP: `${API_BASE_URL}/auth/signup`,
 };
 
 export default API_ROUTES;
