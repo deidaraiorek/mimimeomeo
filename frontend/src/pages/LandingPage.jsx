@@ -1,6 +1,6 @@
 import React from 'react'
 import Boxes from '../components/landing/Boxes'
-import Budu from '../assets/budu.png'
+import Budu from '../assets/images/budu.png'
 import HeroSection from '../components/landing/HeroSection'
 
 const LandingPage = () => {

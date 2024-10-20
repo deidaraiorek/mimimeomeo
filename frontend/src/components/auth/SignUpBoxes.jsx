@@ -17,7 +17,7 @@ const SignUpBoxes = () => {
 
     const handleRegister = async () => {
         if (pw != cfpw) {
-            toast.error("Password doesn't match")
+            toast.error("Password doesn't match", {duration:1000})
             return
         }
         const userData = {
@@ -37,14 +37,14 @@ const SignUpBoxes = () => {
                 if (token) {
                     // Store token in localStorage
                     localStorage.setItem('token', token);
-                    localStorage.setItem('user', user)
-                    console.log(JSON.stringify(user))
+                    localStorage.setItem('user', JSON.stringify(user))
+                    window.dispatchEvent(new Event('storageChange'));
                     navigate('/notes') // fix later
                 }
             }
         } catch (error) {
+            toast.error("Sign up failed. Please check your email or password.", {duration:1000})
             console.error(error.message)
-            toast.error("Sign up failed. Please check your email or password.")
 
         }
 

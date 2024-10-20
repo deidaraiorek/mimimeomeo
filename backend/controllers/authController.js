@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 
 const signup = async (req, res) => {
-    const {name, email, password} = req.body;
+    const { name, email, password } = req.body;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -14,10 +14,9 @@ const signup = async (req, res) => {
     }
 
     const existemail = await prisma.user.findUnique({
-        where: {email}
+        where: { email }
     })
     if (existemail) {
-        console.log("email exist")
         return res.status(400).json("Email already exists")
     }
 
@@ -39,10 +38,12 @@ const signup = async (req, res) => {
     const { password: _, createdAt, updatedAt, ...userWithoutSensitiveInfo } = newUser;
 
     res.status(201).json({ user: userWithoutSensitiveInfo, token });
+
+    return;
 }
 
 const login = async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -50,7 +51,7 @@ const login = async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-        where: {email}
+        where: { email }
     })
     if (!user) {
         return res.status(400).json("Email doesn't exist")
@@ -58,7 +59,7 @@ const login = async (req, res) => {
 
     const check = await bcrypt.compare(password, user.password)
     if (!check) {
-        res.status(400).json("Incorrect Password")
+        return res.status(400).json("Incorrect Password")
     }
 
     const token = jwt.sign(
@@ -71,9 +72,11 @@ const login = async (req, res) => {
     const { password: _, createdAt, updatedAt, ...userWithoutSensitiveInfo } = user;
 
     res.status(200).json({ user: userWithoutSensitiveInfo, token });
+
+    return;
 };
 
-module.exports ={
+module.exports = {
     login,
     signup
 }

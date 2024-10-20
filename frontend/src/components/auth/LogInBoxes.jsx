@@ -41,13 +41,14 @@ const LogInBoxes = () => {
                 if (token) {
                     // Store token in localStorage
                     localStorage.setItem('token', token);
-                    localStorage.setItem('user', user)
+                    localStorage.setItem('user', JSON.stringify(user))
+                    window.dispatchEvent(new Event('storageChange'));
                     navigate('/notes') // fix later
                 }
             }
         } catch (error) {
+            toast.error("Log in failed. Please check your email or password.", {duration: 1000,})
             console.error(error.message)
-            toast.error("Log in failed. Please check your email or password.")
 
         }
     }
@@ -64,7 +65,7 @@ const LogInBoxes = () => {
                         id="email"
                         name="email"
                         value={email}
-                        className='text-black pl-0 focus:ring-0 focus: border-none'
+                        className='text-black pl-0 focus:ring-0 focus: border-none flex-grow'
                         onChange={(e) => handleChange(e, setEmail)} />
                 </div>
             </div>

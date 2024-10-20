@@ -1,6 +1,6 @@
 import React from 'react'
 import SignUpBoxes from '../../components/auth/SignUpBoxes'
-import SignUpImage from '../../assets/signupimage.png'
+import SignUpImage from '../../assets/images/signupimage.png'
 const SignUp = () => {
   return (
     <div className='flex h-screen'>

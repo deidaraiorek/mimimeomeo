@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import invitationbg from "../assets/invitationbg.png";
+import invitationbg from "../assets/images/invitationbg.png"
 import { useNavigate } from "react-router-dom";
 
 const Invitation = () => {
