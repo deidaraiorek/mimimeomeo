@@ -1,10 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+// index.js
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import { WebSocketProvider } from "./WebSocketContext";
+import "./index.css";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.render(
+  <WebSocketProvider>
     <App />
-  </StrictMode>,
-)
+  </WebSocketProvider>,
+  document.getElementById("root")
+);

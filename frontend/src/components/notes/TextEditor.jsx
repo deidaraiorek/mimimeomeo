@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
-import { API_ROUTES } from "../constants/apiRoutes";
+import { API_ROUTES } from "../../constants/apiRoutes";
 import { toast } from "react-hot-toast";
 
 function TextEditor({ note, onUpdateNote }) {
