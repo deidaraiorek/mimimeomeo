@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import TextEditor from "../components/TextEditor";
-import { API_ROUTES } from "../constants/apiRoutes";
+import Sidebar from "../../components/Sidebar"
+import TextEditor from "../../components/TextEditor";
+import { API_ROUTES } from "../../constants/apiRoutes";
 
 function CoupleNote() {
   const [notes, setNotes] = useState([]);

@@ -89,7 +89,7 @@ const LogInBoxes = () => {
             </div>
             <div className='flex justify-between'>
                 <div></div>
-                <a href="#" className='text-right'>Forgot Password?</a>
+                <a href="/forgotpassword" className='text-right hover:underline'>Forgot Password?</a>
             </div>
             <button className='p-4 rounded-full bg-pink-400 text-white font-bold text-[1.25em] shadow-lg hover:shadow-xl transition-shadow duration-300' onClick={handleLogin}>Log In</button>
             <div className='text-center'>Don't have an account? <a href='/signup' className='text-pink-600 hover:text-pink-800 font-bold'>Sign Up</a></div>

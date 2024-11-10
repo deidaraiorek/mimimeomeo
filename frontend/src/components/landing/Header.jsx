@@ -1,7 +1,7 @@
 import React from 'react'
 import avatar from '../../assets/images/avatar.png'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 const Header = () => {
   const navigate = useNavigate()
@@ -38,13 +38,13 @@ const Header = () => {
         {
           isLoggedIn ? (
             <>
-              <a href='/invite' className='hover:text-pink-200'>Invite</a>
+              <Link to = '/invite' className='hover:text-pink-200'>Invite</Link>
               <button onClick={handleLogout} className='hover:text-pink-200'>Log Out</button>
             </>
           ) : (
             <>
-              <a href='/signup' className='hover:text-pink-200'>Sign up</a>
-              <a href='/login' className='hover:text-pink-200'>Log In</a>
+              <Link to='/signup' className='hover:text-pink-200'>Sign up</Link>
+              <Link to='/login' className='hover:text-pink-200'>Log In</Link>
             </>
           )
         }
