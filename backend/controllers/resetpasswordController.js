@@ -75,7 +75,7 @@ const resetPassword = async (req, res) => {
       });
   
       if (!user || user.resetPasswordToken !== token) {
-        return res.status(400).json("Invalid or expired token");
+        return res.status(400).json("Invalid or expired link");
       }
   
       const hashedPassword = await bcrypt.hash(password, 10);
