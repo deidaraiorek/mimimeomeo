@@ -2,12 +2,19 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
-import Sidebar from "../../components/Sidebar"
+import Sidebar from "../../components/Sidebar";
 import TextEditor from "../../components/TextEditor";
 import { API_ROUTES } from "../../constants/apiRoutes";
+import useCheckStatus from "../../components/CheckStatus";
+import { createClient } from "@supabase/supabase-js";
 
 function CoupleNote() {
+  const supabase = createClient(
+    "https://pzzbmwmmtstgswoqibtg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJtd21tdHN0Z3N3b3FpYnRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNzMxMDU4OSwiZXhwIjoyMDQyODg2NTg5fQ.wvL6juRWbv_wJysyGhtFMLEuoL4t2OIqRI7cVQ0GhGg"
+  );
   const [notes, setNotes] = useState([]);
+  const { coupleEmail, coupleId } = useCheckStatus();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,11 +30,45 @@ function CoupleNote() {
     return notes.find((note) => note.id === currentNoteId) || null;
   }, [notes, currentNoteId]);
 
+  useEffect(() => {
+    const notesChannel = supabase
+      .channel("public:Note")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "Note",
+          filter: `coupleId=eq.${coupleId}`,
+        },
+        (payload) => {
+          console.log("Note change received:", payload);
+          const { eventType, new: newNote, old: oldNote } = payload;
+
+          if (eventType === "INSERT") {
+            setNotes((prevNotes) => [...prevNotes, newNote]);
+          } else if (eventType === "UPDATE") {
+            setNotes((prevNotes) =>
+              prevNotes.map((note) => (note.id === newNote.id ? newNote : note))
+            );
+          } else if (eventType === "DELETE") {
+            setNotes((prevNotes) =>
+              prevNotes.filter((note) => note.id !== oldNote.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(notesChannel);
+    };
+  }, [coupleId]);
+
   // Fetch notes on mount
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const coupleId = "3"; // Replace with actual coupleId
         const response = await axios.get(API_ROUTES.GET_COUPLE_NOTES(coupleId));
 
         const processedNotes = response.data.map((note) => ({
@@ -80,14 +121,13 @@ function CoupleNote() {
         title: `Note ${notes.length + 1}`,
         content: { ops: [] },
         checkboxCount: { total: 0, checked: 0 },
-        coupleId: "3", // Replace with actual coupleId
+        coupleId: coupleId,
       };
 
       const { data: createdNote } = await axios.post(
         API_ROUTES.CREATE_NOTE,
         newNote
       );
-      setNotes((notes) => [...notes, createdNote]);
       navigate(`/notes/${createdNote.id}`);
     } catch (error) {
       toast.error("Failed to create new note");
@@ -98,12 +138,6 @@ function CoupleNote() {
   const deleteNote = async (noteIdToDelete) => {
     try {
       await axios.delete(API_ROUTES.DELETE_NOTE(noteIdToDelete));
-
-      setNotes((notes) => {
-        const updatedNotes = notes.filter((note) => note.id !== noteIdToDelete);
-        navigate("/notes");
-        return updatedNotes;
-      });
     } catch (error) {
       toast.error("Failed to delete note");
       console.error("Error deleting note:", error);

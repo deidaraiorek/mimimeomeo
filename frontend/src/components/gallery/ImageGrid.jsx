@@ -1,21 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 
-const ImageGrid = ({ images, onImageClick, onDeleteImage }) => {
-  const [loadedStates, setLoadedStates] = useState(Array(images.length).fill(false));
+const ImageGridSkeleton = () => {
+  return (
+    <div className="columns-2 md:columns-4 gap-4 mt-6 space-y-4">
+      {[...Array(8)].map((_, index) => (
+        <div key={index} className="relative break-inside-avoid mb-4">
+          <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse" />
+        </div>
+      ))}
+    </div>
+  );
+};
 
-  const handleImageLoad = (index) => {
-    const newLoadedStates = [...loadedStates];
-    newLoadedStates[index] = true;
-    setLoadedStates(newLoadedStates);
-  };
+const ImageGrid = ({ images, onImageClick, onDeleteImage, isLoading }) => {
+  if (isLoading) {
+    return <ImageGridSkeleton />;
+  }
 
   return (
     <div className="columns-2 md:columns-4 gap-4 mt-6 space-y-4">
       {images.map((imageUrl, index) => {
         const imageName = imageUrl.split("/").pop();
-        
+
         return (
-          <div key={index} className={`relative break-inside-avoid mb-4 ${loadedStates[index] ? 'opacity-100' : 'opacity-0'}`}>
+          <div key={imageName} className="relative break-inside-avoid mb-4">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -29,8 +37,7 @@ const ImageGrid = ({ images, onImageClick, onDeleteImage }) => {
               <img
                 className="w-full h-auto rounded-lg object-cover hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
                 src={imageUrl}
-                alt={`Image ${index + 1}`}
-                onLoad={() => handleImageLoad(index)}
+                alt={imageName}
               />
             </a>
           </div>
