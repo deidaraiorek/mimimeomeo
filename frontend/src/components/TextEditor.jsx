@@ -5,7 +5,7 @@ import axios from "axios";
 import { API_ROUTES } from "../constants/apiRoutes";
 import { toast } from "react-hot-toast";
 
-function TextEditor({ note, onUpdateNote }) {
+function TextEditor({ note }) {
   const quillRef = useRef(null);
   const saveTimeoutRef = useRef(null);
   const [title, setTitle] = useState(note.title);
@@ -33,7 +33,6 @@ function TextEditor({ note, onUpdateNote }) {
       content: deltaContent,
       checkboxCount: countCheckboxes(deltaContent),
     };
-    onUpdateNote(updatedNote);
 
     saveTimeoutRef.current = setTimeout(() => {
       saveNoteToBackend(updatedNote);
