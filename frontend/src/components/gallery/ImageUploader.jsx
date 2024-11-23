@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import API_ROUTES from '../../constants/apiRoutes'
 
-const ImageUploader = ({ albumName, coupleId, onUploadSuccess }) => {
+const ImageUploader = ({ albumName, coupleId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (e) => {
@@ -26,7 +26,7 @@ const ImageUploader = ({ albumName, coupleId, onUploadSuccess }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (response.data.publicURL) {
-        onUploadSuccess(response.data.publicURL);
+        console.log("Successful")
       } else {
         console.error("No public URL returned in response");
       }

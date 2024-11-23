@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { BarIcon } from '../../assets/icon'
+import { BarIcon, HeartIcon } from '../../assets/icon'
 
 const Header = () => {
   const navigate = useNavigate()
@@ -38,7 +38,10 @@ const Header = () => {
 
   return (
     <div className='bg-pink-400 text-white p-4 text-center flex justify-between items-center h-14'>
-      <div className='text-[1.5em] font-bold'>BuDu Family</div>
+      <div className='flex items-center gap-1'>
+        {HeartIcon}
+        <div className='text-[1.5em] font-bold'>BuDu Family</div>
+      </div>
       <nav className='flex space-x-1 items-center text-[1.1em] font-sans text-lg'>
         <button className='py-1 w-20 rounded-full bg-transparent hover:bg-gray-200/20 transition-all duration-200' onClick={() => navigate('/')}>Home</button>
         {

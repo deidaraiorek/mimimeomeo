@@ -122,7 +122,7 @@ function TextEditor({ note }) {
             type="text"
             value={title}
             onChange={handleTitleChange}
-            className="text-2xl font-semibold text-gray-900 border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
+            className="text-2xl font-semibold text-gray-900 border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded-lg px-2 py-1"
           />
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <span>

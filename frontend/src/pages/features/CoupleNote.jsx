@@ -10,11 +10,12 @@ import { createClient } from "@supabase/supabase-js";
 
 function CoupleNote() {
   const supabase = createClient(
-    "https://pzzbmwmmtstgswoqibtg.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJtd21tdHN0Z3N3b3FpYnRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNzMxMDU4OSwiZXhwIjoyMDQyODg2NTg5fQ.wvL6juRWbv_wJysyGhtFMLEuoL4t2OIqRI7cVQ0GhGg"
+    import.meta.env.VITE_SUPABASE_CLIENT_URL,
+    import.meta.env.VITE_SUPABASE_CLIENT_KEY
   );
+
   const [notes, setNotes] = useState([]);
-  const { coupleEmail, coupleId } = useCheckStatus();
+  const { coupleEmail, coupleId} = useCheckStatus();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
