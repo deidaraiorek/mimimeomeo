@@ -5,7 +5,7 @@ import axios from "axios";
 import { API_ROUTES } from "../constants/apiRoutes";
 import { toast } from "react-hot-toast";
 
-function TextEditor({ note }) {
+function TextEditor({ note, onUpdateNote }) {
   const quillRef = useRef(null);
   const saveTimeoutRef = useRef(null);
   const [title, setTitle] = useState(note.title);

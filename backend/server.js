@@ -9,7 +9,6 @@ const SpecialDateRouter = require ('./routes/SpecialDate')
 const GalleryRouter = require('./routes/Gallery')
 const ResetPasswordRouter = require('./routes/ResetPassword')
 
-
 dotenv.config();
 
 const prisma = new PrismaClient();
