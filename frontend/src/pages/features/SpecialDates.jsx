@@ -11,12 +11,14 @@ import { createClient } from "@supabase/supabase-js";
 const SpecialDates = () => {
   const { coupleEmail, coupleId } = useCheckStatus();
   const supabase = createClient(
-    "https://pzzbmwmmtstgswoqibtg.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJtd21tdHN0Z3N3b3FpYnRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNzMxMDU4OSwiZXhwIjoyMDQyODg2NTg5fQ.wvL6juRWbv_wJysyGhtFMLEuoL4t2OIqRI7cVQ0GhGg"
+    import.meta.env.VITE_SUPABASE_CLIENT_URL,
+    import.meta.env.VITE_SUPABASE_CLIENT_KEY
   );
 
   const [events, setEvents] = useState([]);
+  
   useEffect(() => {
+    if (!coupleId) return;
     const getEvents = async () => {
       try {
         const response = await axios.get(API_ROUTES.SHOW_EVENT(coupleId));
@@ -47,14 +49,6 @@ const SpecialDates = () => {
           const { eventType, new: newEvent, old: oldEvent } = payload;
           if (eventType === "INSERT") {
             setEvents((prevEvents) => [...prevEvents, newEvent]);
-          } else if (eventType === "UPDATE") {
-            console.log("updateing event:", oldEvent);
-
-            setEvents((prevEvents) =>
-              prevEvents.map((event) =>
-                event.id === newEvent.id ? newEvent : event
-              )
-            );
           } else if (eventType === "DELETE") {
             setEvents((prevEvents) =>
               prevEvents.filter((event) => event.id !== oldEvent.id)

@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, Dropdown } from "flowbite-react";
 import { HiPlus, HiTrash, HiDotsVertical } from "react-icons/hi";
+import { AddIconBlack } from "../assets/icon";
 
 function Sidebar({ notes, onCreateNew, onDelete }) {
   const { noteId } = useParams();
@@ -10,16 +11,10 @@ function Sidebar({ notes, onCreateNew, onDelete }) {
     <div className="w-64 bg-white border-r border-gray-200 h-screen overflow-y-auto">
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Notes</h2>
-          <Button
-            size="sm"
-            color="gray"
-            pill
-            onClick={onCreateNew}
-            className="!p-2"
-          >
-            <HiPlus className="h-4 w-4" />
-          </Button>
+          <h2 className="text-lg font-semibold text-gray-900">Your Notes</h2>
+          <button onClick={onCreateNew}>
+            {AddIconBlack}
+          </button>
         </div>
         <div className="space-y-1">
           {notes.map((note) => (

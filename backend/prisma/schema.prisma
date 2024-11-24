@@ -71,13 +71,19 @@ model Event {
 
 model Album {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
+  name      String
+  lastImage String?
+  images    String[]
   createdAt DateTime @default(now())
-  coupleId  Int      // Link each album to a couple
+  coupleId  Int
   couple    Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
 
+  @@unique([name, coupleId])
   @@index([coupleId])
 }
+
+
+
 
 
 
