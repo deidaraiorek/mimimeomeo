@@ -108,7 +108,7 @@ function CoupleNote() {
         notes.map((note) => (note.id === updatedNote.id ? updatedNote : note))
       );
 
-      // await axios.put(API_ROUTES.UPDATE_NOTE(updatedNote.id), updatedNote);
+      await axios.put(API_ROUTES.UPDATE_NOTE(updatedNote.id), updatedNote);
     } catch (error) {
       toast.error("Failed to update note");
       console.error("Error updating note:", error);
