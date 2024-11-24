@@ -1,27 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_ROUTES } from '../../constants/apiRoutes';
-import { useWebSocket } from './WebSocket';
 import useCheckStatus from '../CheckStatus';
-import { useNavigate } from 'react-router-dom';
-
+import { createClient } from "@supabase/supabase-js";
 
 const SendInvitation = () => {
-    const [invitationEmail, setInvitationEmail] = useState("");
-    const { coupleEmail, coupleId } = useCheckStatus();
-    const navigate = useNavigate()
+    const supabase = createClient(
+        import.meta.env.VITE_SUPABASE_CLIENT_URL,
+        import.meta.env.VITE_SUPABASE_CLIENT_KEY
+    );
 
-    useWebSocket((message) => {
-        if (message === 'INVITATION_ACCEPTED') {
-            window.location.reload();
-        } 
-        if ( message === 'BREAK_UP') {
-            localStorage.removeItem('coupleEmail');
-            localStorage.removeItem('coupleId');
-            window.location.reload();
+    const [invitationEmail, setInvitationEmail] = useState("");
+    const { coupleEmail: initialEmail, coupleId: initialId } = useCheckStatus();
+    const [coupleEmail, setCoupleEmail] = useState(initialEmail);
+    const [coupleId, setCoupleId] = useState(initialId);
+
+    const [loading, setLoading] = useState(true);
+
+    const getUserEmail = () => {
+        const user = localStorage.getItem('user');
+        const userData = JSON.parse(user);
+        return userData.email;
+      };
+
+    const userEmail = getUserEmail();
+
+    useEffect(() => {
+        // Update couple details after useCheckStatus finishes
+        if (initialEmail !== undefined && initialId !== undefined) {
+            setCoupleEmail(initialEmail);
+            setCoupleId(initialId);
+            setLoading(false); // Mark loading as complete
         }
-    });
+    }, [initialEmail, initialId]);
+
+    useEffect(() => {
+        const coupleChannel = supabase
+            .channel("public:Couple")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*", // Listen for both INSERT and DELETE events
+                    schema: "public",
+                    table: "Couple",
+                },
+                async (payload) => {
+                    const { eventType, new: newCouple, old: oldCouple } = payload;
+    
+                    if (eventType === "INSERT") {
+                        try {
+                            // Fetch users related to the new couple
+                            const { data: users, error } = await supabase
+                                .from("User") // Replace 'User' with your table name
+                                .select("email")
+                                .eq("coupleId", newCouple.id);
+    
+                            if (error) throw error;
+    
+                            // Check if the logged-in user is part of this couple
+                            const isUserInCouple = users
+                                ?.map((user) => user.email)
+                                ?.includes(userEmail);
+    
+                            if (isUserInCouple) {
+                                // Update local state and UI
+                                const partnerEmail = users
+                                    ?.map((user) => user.email)
+                                    ?.find((email) => email !== userEmail);
+    
+                                localStorage.setItem("coupleEmail", partnerEmail);
+                                localStorage.setItem("coupleId", newCouple.id);
+                                setCoupleEmail(partnerEmail);
+                                setCoupleId(newCouple.id);
+    
+                                toast.success("Invitation accepted! You are now in a couple.");
+                            }
+                        } catch (err) {
+                            console.error("Error fetching user details:", err.message);
+                            toast.error("Failed to update couple details.");
+                        }
+                    } else if (eventType === "DELETE") {
+                        try {
+                            const storedCoupleId = localStorage.getItem("coupleId");
+                            // Ensure type matching (oldCouple.id may be a number, storedCoupleId is a string)
+                            if (String(oldCouple.id) === storedCoupleId) {
+                                localStorage.removeItem("coupleEmail");
+                                localStorage.removeItem("coupleId");
+                                setCoupleEmail(null);
+                                setCoupleId(null);
+    
+                                toast.error("You are no longer in a couple.");
+                            }
+                        } catch (err) {
+                            console.error("Error handling DELETE event:", err.message);
+                            toast.error("Failed to update couple details.");
+                        }
+                    }
+                }
+            )
+            .subscribe();
+    
+        return () => {
+            supabase.removeChannel(coupleChannel);
+        };
+    }, [userEmail, supabase]);
+    
 
     const handleSendInvitation = async () => {
         if (!invitationEmail) {
@@ -29,7 +113,7 @@ const SendInvitation = () => {
             return;
         }
 
-        const senderEmail = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).email : null;
+        const senderEmail = getUserEmail()
         const invitationData = { senderEmail, receiverEmail: invitationEmail };
 
         try {
@@ -37,6 +121,7 @@ const SendInvitation = () => {
                 headers: { 'Content-Type': 'application/json' },
             });
             toast.success("Invitation sent successfully!");
+            setInvitationEmail("")
         } catch (error) {
             toast.error(error.response?.data || "An error occurred");
             console.error("Invitation Error:", error.message);
@@ -55,6 +140,15 @@ const SendInvitation = () => {
             console.error("Breakup Error:", error.message);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+                <p className="text-center text-gray-500">Loading...</p>
+            </div>
+        );
+    }
+
 
     return (
         <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">

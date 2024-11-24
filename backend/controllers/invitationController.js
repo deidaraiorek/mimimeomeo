@@ -1,7 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { broadcastMessage } = require('../websocket');
+
 
 const sendInvitation = async (req, res) => {
     const { senderEmail, receiverEmail } = req.body
@@ -79,20 +79,6 @@ const sendInvitation = async (req, res) => {
     return;
 }
 
-const showInvitation = async (req, res) => {
-    const { receiverEmail } = req.query
-    const invitation = await prisma.invitation.findUnique({
-        where: {
-            receiverEmail: receiverEmail,
-        },
-    })
-    if (invitation) {
-        return res.status(200).json(invitation)
-    } else {
-        return res.status(200).json("")
-    }
-}
-
 const statusInvitation = async (req, res) => {
     const { invitation, status } = req.body;
 
@@ -114,8 +100,6 @@ const statusInvitation = async (req, res) => {
                     users: true, // Include the users data in the response
                 },
             });
-
-            broadcastMessage('INVITATION_ACCEPTED');
 
             return res.status(201).json(newCouple);
         } else {
@@ -144,7 +128,6 @@ const breakCouple = async (req, res) => {
         },
     });
 
-    broadcastMessage('BREAK_UP');
     return res.status(200).json({ message: "Break up successfully" });
 }
 
@@ -173,11 +156,24 @@ const checkCouple = async (req, res) => {
     }
 };
 
+const showInvitation = async (req, res) => {
+    const { receiverEmail } = req.query
+    const invitation = await prisma.invitation.findUnique({
+        where: {
+            receiverEmail: receiverEmail,
+        },
+    })
+    if (invitation) {
+        return res.status(200).json(invitation)
+    } else {
+        return res.status(200).json("")
+    }
+}
 
 module.exports = {
     sendInvitation,
-    showInvitation,
     statusInvitation,
+    showInvitation,
     breakCouple,
     checkCouple,
 }

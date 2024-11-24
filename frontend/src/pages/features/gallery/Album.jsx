@@ -6,8 +6,14 @@ import ImageGrid from "../../../components/gallery/ImageGrid";
 import ImageUploader from "../../../components/gallery/ImageUploader";
 import GLightbox from "glightbox";
 import "glightbox/dist/css/glightbox.min.css";
+import { createClient } from "@supabase/supabase-js";
+import { Toaster, toast } from "react-hot-toast";
 
 const Album = () => {
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_CLIENT_URL,
+    import.meta.env.VITE_SUPABASE_CLIENT_KEY
+  );
   const { albumName } = useParams();
   const location = useLocation();
   const coupleId = location.state?.coupleId;
@@ -44,9 +50,6 @@ const Album = () => {
     getImages();
   }, [albumName, coupleId]);
 
-  const addImageToState = (newImageUrl) => {
-    setImages((prevImages) => [...prevImages, newImageUrl]);
-  };
 
   const openLightbox = (index) => {
     setCurrentImageIndex(index);
@@ -73,15 +76,44 @@ const Album = () => {
     }
   };
 
+  useEffect(() => {
+    const albumChannel = supabase
+      .channel("public:Album")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "Album",
+          filter: `coupleId=eq.${coupleId}`,
+        },
+        (payload) => {
+          const { eventType, new: newAlbum, old: oldAlbum } = payload;
+
+          if (newAlbum.name === albumName) {
+            if (eventType === "UPDATE" && oldAlbum.images !== newAlbum.images) {
+              setImages(newAlbum.images);
+            }
+          }
+
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(albumChannel);
+    };
+  }, [albumName, coupleId]);
+
   return (
     <div className="px-4 py-6">
+      <Toaster position="top-left" reverseOrder={false} />
       <p className="text-4xl font-semibold mb-6 text-pink-900 text-center">
         {albumName}
       </p>
       <ImageUploader
         albumName={albumName}
         coupleId={coupleId}
-        onUploadSuccess={addImageToState}
       />
       {error ? (
         <div className="text-red-500 text-center mt-4">

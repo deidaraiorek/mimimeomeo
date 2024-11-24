@@ -1,25 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_ROUTES } from '../../constants/apiRoutes';
 import StatusInvitation from './StatusInvitation';
-import { useWebSocket } from './WebSocket';
+import { createClient } from "@supabase/supabase-js";
+
 
 const ShowInvitation = () => {
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_CLIENT_URL,
+    import.meta.env.VITE_SUPABASE_CLIENT_KEY
+  );
   const [isInvitationOpen, setIsInvitationOpen] = useState(false);
-  const [invitation, setInvitation] = useState(null); 
+  const [invitation, setInvitation] = useState(null);
   const [hasInvitation, setHasInvitation] = useState(false)
-  const [loading, setLoading] = useState(false);  
-
-  useWebSocket((message) => {
-    if (message.type === 'new_invitation') {
-
-      setInvitation(message.data);
-      setHasInvitation(true);
-      localStorage.setItem('invitation', JSON.stringify(message.data));
-      toast.success("You've received a new invitation!");
-    }
-  });
+  const [loading, setLoading] = useState(false);
 
   const getUserEmail = () => {
     const user = localStorage.getItem('user');
@@ -62,6 +57,38 @@ const ShowInvitation = () => {
     }
   };
 
+  useEffect(() => {
+    const receiverEmail = getUserEmail();
+
+    const invitationChannel = supabase
+      .channel('public:Invitation')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'Invitation',
+          filter: `receiverEmail=eq.${receiverEmail}`,
+        },
+        (payload) => {
+          const { eventType, new: newInvitation, old: oldInvitation } = payload;
+
+          if (eventType === 'INSERT') {
+            // Notify receiver of a new invitation
+            toast.success(`New invitation from ${newInvitation.senderEmail}`);
+            setInvitation(newInvitation);
+            setHasInvitation(true);
+            localStorage.setItem('invitation', JSON.stringify(newInvitation));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(invitationChannel);
+    };
+  }, []);
+
   return (
     <div className="absolute top-20 right-5">
       <button
@@ -78,14 +105,14 @@ const ShowInvitation = () => {
             hasInvitation && invitation ? (
               <div className='flex flex-col items-center justify-center'>
                 <p>Invitation from: <strong>{invitation.senderEmail}</strong></p>
-                <StatusInvitation 
-                  setHasInvitation={setHasInvitation} 
+                <StatusInvitation
+                  setHasInvitation={setHasInvitation}
                   setIsInvitationOpen={setIsInvitationOpen}
                 />
               </div>
 
             ) : (
-              <p>No invitations yet.</p>  
+              <p>No invitations yet.</p>
             )
           )}
         </div>

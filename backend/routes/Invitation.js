@@ -4,9 +4,9 @@ const { sendInvitation, showInvitation, statusInvitation, breakCouple, checkCoup
 const InviteRouter = express.Router();
 
 InviteRouter.post('/send', sendInvitation);
-InviteRouter.get('/show', showInvitation);
 InviteRouter.post('/response', statusInvitation);
 InviteRouter.post('/breakup', breakCouple);
 InviteRouter.get('/couplecheck/:userEmail', checkCouple);
+InviteRouter.get('/show', showInvitation);
 
 module.exports = InviteRouter;

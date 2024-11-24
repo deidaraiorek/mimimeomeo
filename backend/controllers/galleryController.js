@@ -79,11 +79,12 @@ const createAlbum = async (req, res) => {
     try {
         const { albumName, coupleId } = req.body;
 
-        const existingAlbum = await prisma.album.findUnique({
+        const existingAlbum = await prisma.album.findFirst({
             where: {
-                name: albumName
-            }
-        })
+                name: albumName,
+                coupleId: parseInt(coupleId), // Ensure `coupleId` is an integer
+            },
+        });
 
         if (existingAlbum) {
             return res.status(400).json("Album name already exists")
@@ -111,7 +112,6 @@ const createAlbum = async (req, res) => {
 };
 
 
-// Upload an image to a specific album for a couple
 const uploadImage = async (req, res) => {
     try {
         const { albumName, coupleId } = req.body;
@@ -146,6 +146,22 @@ const uploadImage = async (req, res) => {
         if (deleteError) {
             console.warn('No .keep file found, or failed to delete:', deleteError);
         }
+
+        //update album's array
+        await prisma.album.update({
+            where: {
+                name_coupleId: {
+                    name: albumName,
+                    coupleId: parseInt(coupleId),
+                },
+            },
+            data: {
+                images: {
+                    push: publicURL, // Add the new URL to the images array
+                },
+            },
+        });
+
         res.status(201).json({ publicURL });
     } catch (error) {
         console.error('Error uploading image:', error);
@@ -159,8 +175,11 @@ const deleteAlbum = async (req, res) => {
         const { coupleId, albumName } = req.params;
 
         // Check if the album exists in the database
-        const existingAlbum = await prisma.album.findUnique({
-            where: { name: albumName }
+        const existingAlbum = await prisma.album.findFirst({
+            where: {
+                name: albumName,
+                coupleId: parseInt(coupleId), // Ensure `coupleId` is an integer
+            },
         });
 
         if (!existingAlbum) {
@@ -194,7 +213,9 @@ const deleteAlbum = async (req, res) => {
 
         // Delete the album record from the database
         await prisma.album.delete({
-            where: { name: albumName }
+            where: {
+                id: existingAlbum.id, // Use the primary key for deletion
+            },
         });
 
         res.status(204).send();
@@ -208,7 +229,14 @@ const deleteImage = async (req, res) => {
     try {
         const { coupleId, albumName, imageName } = req.params;
 
+        // Construct the file path
         const filePath = `${coupleId}/${albumName}/${imageName}`;
+
+        // Construct the public URL for the image
+        const publicURL = supabase.storage
+            .from(process.env.SUPABASE_BUCKET_NAME)
+            .getPublicUrl(filePath)
+            .publicUrl;
 
         // Remove the image from Supabase storage
         const { error } = await supabase.storage
@@ -220,6 +248,22 @@ const deleteImage = async (req, res) => {
             return res.status(500).json({ error: "Failed to delete image" });
         }
 
+        const album = await prisma.album.findFirst({
+            where: { name: albumName, coupleId: parseInt(coupleId) },
+        });
+
+        if (!album) {
+            return res.status(404).json({ error: 'Album not found' });
+        }
+
+        const updatedImages = album.images.filter((url) => !url.includes(imageName));
+
+        await prisma.album.update({
+            where: { id: album.id },
+            data: { images: updatedImages },
+        });
+
+
         res.status(204).send();
     } catch (error) {
         console.error("Error deleting image:", error);
@@ -227,13 +271,17 @@ const deleteImage = async (req, res) => {
     }
 };
 
+
 const changeAlbumName = async (req, res) => {
     try {
         const { albumName, newAlbumName, coupleId } = req.body;
 
         // Check if new album name already exists in the database
-        const existingAlbum = await prisma.album.findUnique({
-            where: { name: newAlbumName },
+        const existingAlbum = await prisma.album.findFirst({
+            where: {
+                name: newAlbumName,
+                coupleId: parseInt(coupleId), // Ensure `coupleId` is an integer
+            },
         });
 
         if (existingAlbum) {
@@ -242,7 +290,12 @@ const changeAlbumName = async (req, res) => {
 
         // Update the album name in the database
         const updatedAlbum = await prisma.album.update({
-            where: { name: albumName },
+            where: {
+                name_coupleId: {
+                    name: albumName,
+                    coupleId: parseInt(coupleId),  // ensure coupleId is an integer
+                },
+            },
             data: { name: newAlbumName },
         });
 
@@ -264,11 +317,11 @@ const changeAlbumName = async (req, res) => {
         for (const file of files) {
             const oldFilePath = `${oldFolderPath}/${file.name}`;
             const newFilePath = `${newFolderPath}/${file.name}`;
-            
+
             const { error: moveError } = await supabase.storage
                 .from(process.env.SUPABASE_BUCKET_NAME)
                 .move(oldFilePath, newFilePath);
-                
+
             if (moveError) {
                 console.error("Error moving file:", moveError);
                 return res.status(500).json({ error: "Failed to move album files" });

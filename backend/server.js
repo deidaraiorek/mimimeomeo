@@ -8,8 +8,7 @@ const InviteRouter = require ('./routes/Invitation')
 const SpecialDateRouter = require ('./routes/SpecialDate')
 const GalleryRouter = require('./routes/Gallery')
 const ResetPasswordRouter = require('./routes/ResetPassword')
-const { setupWebSocket } = require('./websocket'); // Import WebSocket setup
-const http = require('http'); // Import http module
+
 
 dotenv.config();
 
@@ -31,11 +30,7 @@ app.get('/', (req, res) => {
   res.send('Hello, Prisma with Node.js and PostgreSQL!');
 });
 
-const server = http.createServer(app);
-
-// Setup WebSocket on the HTTP server
-setupWebSocket(server); 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

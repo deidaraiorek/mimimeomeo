@@ -9,9 +9,15 @@ import AlbumCard from '../../../components/gallery/AlbumCard';
 import CreateAlbumModal from '../../../components/gallery/CreateAlbumModal';
 import EditAlbumModal from '../../../components/gallery/EditAlbumModal';
 import gallerybg from '../../../assets/images/gallerybg.jpg';
+import { createClient } from "@supabase/supabase-js";
+
 
 const Gallery = () => {
-  const { coupleId } = useCheckStatus();
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_CLIENT_URL,
+    import.meta.env.VITE_SUPABASE_CLIENT_KEY
+  );
+  const { coupleEmail, coupleId } = useCheckStatus();
   const [albums, setAlbums] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -21,6 +27,9 @@ const Gallery = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // when useCheckStatus doesnt run completely, dont get albums
+    if (!coupleId) return;
+    
     const getAlbums = async () => {
       try {
         const response = await axios.get(API_ROUTES.SHOW_ALBUMS(coupleId));
@@ -32,12 +41,47 @@ const Gallery = () => {
     getAlbums();
   }, [coupleId]);
 
-  const addAlbum = (newAlbum) => setAlbums((prevAlbums) => [...prevAlbums, newAlbum]);
+  useEffect(() => {
+    const albumChannel = supabase
+      .channel("public:Album")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "Album",
+          filter: `coupleId=eq.${coupleId}`,
+        },
+        (payload) => {
+          const { eventType, new: newAlbum, old: oldAlbum } = payload;
+  
+          if (eventType === "INSERT") {
+            setAlbums((prevAlbums) => [...prevAlbums, newAlbum]);
+          } else if (eventType === "UPDATE") {
+            // Update the album details
+            setAlbums((prevAlbums) =>
+              prevAlbums.map((album) =>
+                album.id === newAlbum.id ? newAlbum : album
+              )
+            );
+          } else if (eventType === "DELETE") {
+            // Remove the deleted album
+            setAlbums((prevAlbums) =>
+              prevAlbums.filter((album) => album.id !== oldAlbum.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(albumChannel);
+    };
+  }, [coupleId]);
 
   const deleteAlbum = async (albumName) => {
     try {
       await axios.delete(API_ROUTES.DELETE_ALBUM(coupleId, albumName));
-      setAlbums((prevAlbums) => prevAlbums.filter(album => album.name !== albumName));
     } catch (error) {
       console.error("Error deleting album:", error.message);
     }
@@ -51,7 +95,6 @@ const Gallery = () => {
 
     try {
       const response = await axios.post(API_ROUTES.CREATE_ALBUMS, { albumName, coupleId });
-      addAlbum(response.data);
       setShowCreateModal(false);
       setAlbumName("");
     } catch (error) {
