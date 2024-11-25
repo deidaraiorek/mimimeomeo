@@ -4,6 +4,7 @@
 // /constants/apiRoutes.js
 
 const API_BASE_URL = 'http://localhost:3000';
+const WEB_SOCKET_BASE_API = 'ws://localhost:3000';
 
 
 // Define endpoints with dynamic segments as functions
@@ -37,6 +38,8 @@ export const API_ROUTES = {
 
   RESET_LINK: `${API_BASE_URL}/forgotpassword`,
   RESET_PASSWORD: `${API_BASE_URL}/forgotpassword/setnewpw`,
+
+  WS_CONNECT: WEB_SOCKET_BASE_API,
 };
 
 export default API_ROUTES;
