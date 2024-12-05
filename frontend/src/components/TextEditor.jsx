@@ -12,13 +12,44 @@ function TextEditor({ note, onUpdateNote }) {
   const [content, setContent] = useState(note.content);
   const [lastSavedContent, setLastSavedContent] = useState(note.content);
   const [lastSavedTitle, setLastSavedTitle] = useState(note.title);
-  // Update when a new note is selected
+
+  // Update local state when note prop changes
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
     setLastSavedContent(note.content);
     setLastSavedTitle(note.title);
   }, [note]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const saveNoteToBackend = async (noteToSave) => {
+    const contentChanged =
+      JSON.stringify(noteToSave.content) !== JSON.stringify(lastSavedContent);
+    const titleChanged = noteToSave.title !== lastSavedTitle;
+
+    if (!contentChanged && !titleChanged) return;
+
+    try {
+      await axios.put(API_ROUTES.UPDATE_NOTE(noteToSave.id), noteToSave);
+      setLastSavedContent(noteToSave.content);
+      setLastSavedTitle(noteToSave.title);
+      onUpdateNote(noteToSave); // Notify parent of the update
+    } catch (error) {
+      console.error("Error saving note:", error);
+      toast.error("Failed to save changes");
+      // Revert to last saved state on error
+      setTitle(lastSavedTitle);
+      setContent(lastSavedContent);
+    }
+  };
 
   const handleContentChange = (content, delta, source, editor) => {
     if (saveTimeoutRef.current) {
@@ -36,7 +67,7 @@ function TextEditor({ note, onUpdateNote }) {
 
     saveTimeoutRef.current = setTimeout(() => {
       saveNoteToBackend(updatedNote);
-    }, 2000);
+    }, 1000);
   };
 
   const handleTitleChange = (e) => {
@@ -50,12 +81,24 @@ function TextEditor({ note, onUpdateNote }) {
     const updatedNote = {
       ...note,
       title: newTitle,
+      content: content, // Include current content to prevent content loss
     };
-    onUpdateNote(updatedNote);
 
     saveTimeoutRef.current = setTimeout(() => {
       saveNoteToBackend(updatedNote);
-    }, 2000);
+    }, 1000);
+  };
+
+  const handleTitleBlur = () => {
+    // Save immediately on blur if there are unsaved changes
+    if (title !== lastSavedTitle) {
+      const updatedNote = {
+        ...note,
+        title: title,
+        content: content,
+      };
+      saveNoteToBackend(updatedNote);
+    }
   };
 
   const countCheckboxes = (delta) => {
@@ -72,23 +115,6 @@ function TextEditor({ note, onUpdateNote }) {
     });
 
     return { total, checked };
-  };
-
-  const saveNoteToBackend = async (noteToSave) => {
-    const contentChanged =
-      JSON.stringify(noteToSave.content) !== JSON.stringify(lastSavedContent);
-    const titleChanged = noteToSave.title !== lastSavedTitle;
-
-    if (!contentChanged && !titleChanged) return;
-
-    try {
-      await axios.put(API_ROUTES.UPDATE_NOTE(noteToSave.id), noteToSave);
-      setLastSavedContent(noteToSave.content);
-      setLastSavedTitle(noteToSave.title);
-    } catch (error) {
-      console.error("Error saving note:", error);
-      toast.error("Failed to save changes");
-    }
   };
 
   const modules = {
@@ -122,6 +148,7 @@ function TextEditor({ note, onUpdateNote }) {
             type="text"
             value={title}
             onChange={handleTitleChange}
+            onBlur={handleTitleBlur}
             className="text-2xl font-semibold text-gray-900 border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded-lg px-2 py-1"
           />
           <div className="flex items-center space-x-2 text-sm text-gray-500">
