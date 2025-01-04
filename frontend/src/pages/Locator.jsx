@@ -1,19 +1,14 @@
 import React, { useContext, useState, useEffect } from "react";
 import { WebSocketContext } from "../WebSocketContext";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import L from "leaflet";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-// Fix for resolving paths correctly in production
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: new URL(markerIcon2x, import.meta.url).toString(),
-  iconUrl: new URL(markerIcon, import.meta.url).toString(),
-  shadowUrl: new URL(markerShadow, import.meta.url).toString(),
+  iconRetinaUrl: "/images/marker-icon-2x.png",
+  iconUrl: "/images/marker-icon.png",
+  shadowUrl: "/images/marker-shadow.png",
 });
 
 const Locator = () => {
