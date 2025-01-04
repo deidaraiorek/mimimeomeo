@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mimimeomeo-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist  # Vite uses 'dist' as the build output directory
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: VITE_API_URL
+        value: https://backend-billowing-mountain-9429.fly.dev
+      - key: VITE_WS_URL
+        value: wss://backend-billowing-mountain-9429.fly.dev
