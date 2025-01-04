@@ -1,7 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  resolve: {
+    alias: {
+      leaflet: 'leaflet/dist/leaflet.js',
+    },
+  },
+  build: {
+    rollupOptions: {
+      external: ['leaflet/dist/leaflet.css'],
+    },
+  },
+});
